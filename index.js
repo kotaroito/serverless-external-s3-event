@@ -26,6 +26,9 @@ class S3Deploy {
           'continue-on-error' : {
             usage: 'Can be used to attempt a partial deploy, where not all functions are available/deployed. They will be skipped and not attmepted.'
           },
+          'put-all' : {
+            usage: 'Can be used to put all events defined in serverless.yml no matter whether the events are already registered or not.'
+          },
           help: {
             usage: 'See https://github.com/matt-filion/serverless-external-s3-event for detailed documentation.'
           }
@@ -148,12 +151,13 @@ class S3Deploy {
            * Remove any events that were previously created. No sense in sending them
            *  across again.
            */
-          if(s3Notifications && s3Notifications.results.length !== 0) {
-            bucketConfiguration.events = bucketConfiguration.events.filter( event => {
-              return !s3Notifications.results.find( s3Event => s3Event.Id === this.s3Facade.getId(event) );
-            })
+          if(!this.options['put-all']) {
+            if(s3Notifications && s3Notifications.results.length !== 0) {
+              bucketConfiguration.events = bucketConfiguration.events.filter( event => {
+                return !s3Notifications.results.find( s3Event => s3Event.Id === this.s3Facade.getId(event) );
+              })
+            }
           }
-
 
           return bucketConfiguration;
         })
